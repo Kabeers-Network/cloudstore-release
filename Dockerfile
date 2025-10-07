@@ -1,17 +1,19 @@
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates wget
+RUN apt-get update && \
+    apt-get install -y wget ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Download the pre-built binary
+# Download binary
 RUN wget -O cl https://github.com/Kabeers-Network/cloudstore-release/releases/download/default-backend/cl && \
     chmod +x cl
 
-# Expose port (Render binds to PORT env var)
+# Verify binary
+RUN file cl && ldd cl || echo "Static binary"
+
 EXPOSE ${PORT:-8080}
 
-# Run the binary
 CMD ["./cl"]
